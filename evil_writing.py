@@ -2,7 +2,7 @@ import tkinter as tk
 import string
 
 class WordProcessorApp:
-    def __init__(self, root, inactivity_time=5, warning_time=3, font=("Georgia", 24)):
+    def __init__(self, root, inactivity_time=3, warning_time=3, font=("Georgia", 20)):
         self.root = root
         self.root.title("Evil writing app")
 
