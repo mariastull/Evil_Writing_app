@@ -92,6 +92,7 @@ class WordProcessorApp:
     def disable_deletion(self):
         """Disable text deletion after 5 minutes."""
         self.deletion_enabled = False
+        self.allow_copy = True
         self.warning_label.config(text="Done! Text will no longer be deleted.", fg="#3bb322")
 
 
@@ -123,6 +124,7 @@ class WordProcessorApp:
         if self.allow_copy:
             pass
         else:
+            # pass
             return "break"
 
     def reset_inactivity_timer(self):
