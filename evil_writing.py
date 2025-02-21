@@ -52,8 +52,8 @@ class WordProcessorApp:
             button.grid(row=0, column=i, padx=5)  # Grid layout
 
         # Create a label to show warning message
-        self.warning_label = tk.Label(self.root, text="", fg="red")
-        self.warning_label.pack()
+        # self.warning_label = tk.Label(self.root, text="", fg="red")
+        # self.warning_label.pack()
 
         self.word_count_label = tk.Label(self.root, text="", fg="#919599")
         self.word_count_label.pack()
@@ -80,6 +80,8 @@ class WordProcessorApp:
         self.text_area.bind("<Control-c>", self.disable_copy_cut)
         self.text_area.bind("<Command-c>", self.disable_copy_cut)
 
+        self.reset_button = tk.Button(self.root, text="Start Over", command=self.reset_button_clicked)
+
         # Start the inactivity timer
         self.reset_inactivity_timer()
 
@@ -94,10 +96,6 @@ class WordProcessorApp:
         if percentage > 1:
             percentage = 1
         self.progress_bar["value"] = int(percentage*300)  
-        # self.warning_label.config(text=f"Progress {percentage}") #debugging
-        if int(percentage) >= 1:
-            self.style.configure("Custom.Horizontal.TProgressbar", background="#3bb322")
-            
 
     def start_word_count_goal(self, wc_goal):
         self.button_frame.pack_forget()
@@ -113,9 +111,8 @@ class WordProcessorApp:
         self.goal_time = num_minutes*60
         self.text_area.config(state="normal")
         self.elapsed_time = 0
-        self.deletion_enabled = True  # Enable deletion initially
+        self.deletion_enabled = True
         self.progress_bar_timer()
-        # self.warning_label.config(text="5-minute timer started!")
         self.root.after(num_minutes * 60 * 1000, self.disable_deletion)  # Set timer
 
         # Start tracking inactivity
@@ -129,17 +126,17 @@ class WordProcessorApp:
             
 
     def disable_deletion(self):
-        """Disable text deletion after 5 minutes."""
         self.deletion_enabled = False
         self.allow_copy = True
-        self.warning_label.config(text="Done! Text will no longer be deleted.", fg="#3bb322")
+        self.style.configure("Custom.Horizontal.TProgressbar", background="#3bb322")
+        self.reset_button.pack(pady=10)
+        # self.warning_label.config(text="Done! Text will no longer be deleted.", fg="#3bb322")
 
 
     def on_user_activity(self, event=None):
         """Reset the inactivity timer whenever the user types."""
 
         if event.char and (event.char.isalnum() or event.char in string.punctuation):
-            # self.warning_label.config(text=f"{event.char} counts as alnum or punctuation")
             if self.inactivity_timer:
                 self.root.after_cancel(self.inactivity_timer)  # Cancel the existing timer
                 self.time_to_delete = False
@@ -165,7 +162,6 @@ class WordProcessorApp:
         if self.allow_copy:
             pass
         else:
-            # pass
             return "break"
 
     def reset_inactivity_timer(self):
@@ -181,20 +177,20 @@ class WordProcessorApp:
         if self.deletion_enabled:
             self.time_to_delete = True
             self.warning_active = True
-            self.warning_label.config(text=f"Text will be deleted in {self.warning_time} seconds!")
-            self.text_area.config(bg="#f1daf7")  # Change background to yellow for warning
+            # self.warning_label.config(text=f"Text will be deleted in {self.warning_time} seconds!")
+            self.text_area.config(bg="#f1daf7")  # Change background to purple for warning
             self.warning_timer = self.root.after((self.warning_time-2) * 1000, self.penultimate_second)
 
     def penultimate_second(self):
         if self.warning_active:
             self.text_area.config(bg="#e6b0f5")
-            self.warning_label.config(text=f"Text will be deleted in {2} seconds!")
+            # self.warning_label.config(text=f"Text will be deleted in {2} seconds!")
         self.warning_timer = self.root.after(1 * 1000, self.last_second)
     
     def last_second(self):
         if self.warning_active:
             self.text_area.config(bg="#e894ff")
-            self.warning_label.config(text=f"Text will be deleted in {1} seconds!")
+            # self.warning_label.config(text=f"Text will be deleted in {1} seconds!")
         self.warning_timer = self.root.after(1 * 1000, self.decide_delete)
     
     def decide_delete(self):
@@ -204,18 +200,34 @@ class WordProcessorApp:
             self.reset_after_warning()
     
     def reset_after_warning(self):
-        self.warning_label.config(text="")  # Clear the warning message
+        # self.warning_label.config(text="")  # Clear the warning message
         self.text_area.config(bg="white")
         self.warning_active = False
 
     def delete_text(self):
         """Delete the text after the warning time."""
         self.text_area.delete(1.0, tk.END)
-        # self.text_area.insert("end-1c", "\n\n\nWhoops...")
-        self.warning_label.config(text="")  # Clear the warning message
+        # self.warning_label.config(text="")  # Clear the warning message
         self.text_area.config(bg="white")  # Reset background to white
         self.warning_active = False
         self.update_word_count()
+    
+    def reset_button_clicked(self):
+        pass
+        self.reset_button.pack_forget()
+        self.button_frame.pack(pady=20)
+        self.text_area.delete(1.0, tk.END)
+        self.set_progress(0)
+        self.style.configure("Custom.Horizontal.TProgressbar", background="#a889f5")
+        
+        self.time_to_delete = False
+        self.warning_active = False
+        self.targeting_word_count = False
+        self.allow_copy = False
+        self.word_count = 0
+        self.update_word_count()
+        self.word_count_target= 0
+        self.goal_time=0
 
 if __name__ == "__main__":
     root = tk.Tk()
